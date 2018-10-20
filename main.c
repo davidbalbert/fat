@@ -38,7 +38,7 @@ u8 *
 drive_read(Drive *d, Lba lba, LbaSize count)
 {
     if (lba + count > d->nsects) {
-        fprintf(stderr, "Can't read past end of drive (lba = %llu, count = %llu, but disk only has %llu sectors)\n", lba, count, d->nsects);
+        fprintf(stderr, "Can't read past end of drive (lba = %lu, count = %lu, but disk only has %lu sectors)\n", lba, count, d->nsects);
         exit(1);
     }
     return d->bytes + lba*d->sect_size;

@@ -3,10 +3,14 @@ OBJS = \
 			 mbr.o\
 			 main.o
 
-LDFLAGS=-lc
+CFLAGS = -m64 -O0 -MD -Wall -Werror -g
+LDFLAGS = -lc
 
 readfat: $(OBJS)
 	$(LD) $(LDFLAGS) -o readfat $(OBJS)
 
+-include *.d
+
+.PHONY: clean
 clean:
-	rm -f *.o
+	rm -f *.o *.d
