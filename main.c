@@ -1,6 +1,7 @@
 #include <fcntl.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -77,8 +78,34 @@ drive_get_part(Drive *d, int partnum)
     return p;
 }
 
+char *cwd;
+
 void
-diskinfo(char *path)
+ls(char *cmd, Drive *d)
+{
+    printf("ls\n");
+}
+
+void
+cat(char *cmd, Drive *d)
+{
+    printf("cat\n");
+}
+
+void
+cd(char *cmd, Drive *d)
+{
+    printf("cd\n");
+}
+
+void
+pwd(char *cmd, Drive *d)
+{
+    printf("%s\n", cwd);
+}
+
+void
+shell(char *path)
 {
     int fd, ret;
     u8 *p;
@@ -108,6 +135,9 @@ diskinfo(char *path)
         .nsects = st.st_size/512,
     };
 
+    cwd = "/";
+
+    /*
     printf("disk: %s\n", path);
     printf("bootable: %s\n", mbr_bootable(drive_mbr(&d)) ? "yes" : "no");
 
@@ -130,7 +160,29 @@ diskinfo(char *path)
     Partition part = drive_get_part(&d, 0);
     FatVbr *vbr = (FatVbr *)part_read(&part, 0, 1);
     printf("\nPartition 1: %s\n", fat_type_str(fat_type(&vbr->bpb)));
+    */
 
+    #define CMD_SIZE 1024
+    char cmd[CMD_SIZE];
+
+    while (1) {
+        printf("> ");
+        fgets(cmd, CMD_SIZE, stdin);
+
+        if (strncmp(cmd, "ls", strlen("ls")) == 0) {
+            ls(cmd, &d);
+        } else if (strncmp(cmd, "cat", strlen("cat")) == 0) {
+            cat(cmd, &d);
+        } else if (strncmp(cmd, "cd", strlen("cd")) == 0) {
+            cd(cmd, &d);
+        } else if (strncmp(cmd, "pwd", strlen("pwd")) == 0) {
+            pwd(cmd, &d);
+        } else if (strncmp(cmd, "exit", strlen("exit")) == 0) {
+            break;
+        } else {
+            printf("Unknown command\n");
+        }
+    }
 
     ret = munmap(p, st.st_size);
     if (ret == -1) {
@@ -157,7 +209,7 @@ main(int argc, char *argv[])
         usage();
     }
 
-    diskinfo(argv[1]);
+    shell(argv[1]);
 
     return 0;
 }

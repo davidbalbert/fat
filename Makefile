@@ -6,11 +6,11 @@ OBJS = \
 CFLAGS = -m64 -O0 -MD -Wall -Werror -g
 LDFLAGS = -lc
 
-readfat: $(OBJS)
-	$(LD) $(LDFLAGS) -o readfat $(OBJS)
+fat: $(OBJS)
+	$(LD) $(LDFLAGS) -o fat $(OBJS)
 
 -include *.d
 
 .PHONY: clean
 clean:
-	rm -f *.o *.d
+	rm -f *.o *.d fat
