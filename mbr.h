@@ -22,5 +22,6 @@ int mbr_pe_c(u8 chs[3]);
 int mbr_pe_h(u8 chs[3]);
 int mbr_pe_s(u8 chs[3]);
 
+int mbr_pe_active(MbrPartitionEntry *pe);
 u32 mbr_pe_lba_start(MbrPartitionEntry *pe);
 u32 mbr_pe_lba_size(MbrPartitionEntry *pe);
