@@ -105,6 +105,18 @@ pwd(char *cmd, Drive *d)
 }
 
 void
+help(char *cmd, Drive *d)
+{
+    printf("Available commands:\n");
+    printf("- ls\n");
+    printf("- cat\n");
+    printf("- cd\n");
+    printf("- pwd\n");
+    printf("- help\n");
+    printf("- exit\n");
+}
+
+void
 shell(char *path)
 {
     int fd, ret;
@@ -164,10 +176,15 @@ shell(char *path)
 
     #define CMD_SIZE 1024
     char cmd[CMD_SIZE];
+    char *s;
 
     while (1) {
         printf("> ");
-        fgets(cmd, CMD_SIZE, stdin);
+        s = fgets(cmd, CMD_SIZE, stdin);
+
+        if (s == NULL) {
+            break;
+        }
 
         if (strncmp(cmd, "ls", strlen("ls")) == 0) {
             ls(cmd, &d);
@@ -177,6 +194,8 @@ shell(char *path)
             cd(cmd, &d);
         } else if (strncmp(cmd, "pwd", strlen("pwd")) == 0) {
             pwd(cmd, &d);
+        } else if (strncmp(cmd, "help", strlen("help")) == 0) {
+            help(cmd, &d);
         } else if (strncmp(cmd, "exit", strlen("exit")) == 0) {
             break;
         } else {
