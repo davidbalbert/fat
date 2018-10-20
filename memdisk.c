@@ -4,7 +4,6 @@
 #include "u.h"
 
 #include "disk.h"
-#include "part.h"
 #include "memdisk.h"
 #include "mbr.h"
 

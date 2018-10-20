@@ -9,7 +9,6 @@
 #include "u.h"
 
 #include "disk.h"
-#include "part.h"
 #include "memdisk.h"
 #include "fat.h"
 #include "mbr.h"

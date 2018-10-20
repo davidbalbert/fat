@@ -13,3 +13,13 @@ typedef struct DiskOperations {
 
 Disk *disk_init(Disk *d, DiskOperations *ops);
 u8 *disk_read(Disk *d, Lba lba, LbaCount count);
+
+
+typedef struct Partition {
+    Disk base;
+    Disk *owner;
+    Lba offset;
+    LbaCount nsects;
+} Partition;
+
+Partition *part_init(Partition *part, Disk *owner, Lba offset, LbaCount nsects);
