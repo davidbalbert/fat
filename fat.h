@@ -1,3 +1,9 @@
+typedef enum FatType {
+    FAT12,
+    FAT16,
+    FAT32,
+} FatType;
+
 typedef struct __attribute__((packed)) FatBpb {
     u16 bytes_per_sect;
     u8  sects_per_cluster;
@@ -30,12 +36,21 @@ typedef struct __attribute__((packed)) FatVbr {
     FatBpb bpb;
 } FatVbr;
 
-typedef enum FatType {
-    FAT12,
-    FAT16,
-    FAT32,
-} FatType;
-
+typedef struct __attribute__((packed)) FatDirEnt {
+    char fname[8];
+    char ext[3];
+    u8   attr;
+    u8   reserved;
+    u8   ctime_tenths; // 0-199.
+    u16  ctime;
+    u16  cdate;
+    u16  adate; // last accessed (read or write
+    u16  first_cluster_hi;
+    u16  mtime;
+    u16  mdate;
+    u16  first_cluster_lo;
+    u32  filesz;
+} FatDirEnt;
 
 u32 fat_nsects(FatBpb *bpb);
 u32 fat_fatsz(FatBpb *bpb);
@@ -47,3 +62,5 @@ u32 fat_nclusters(FatBpb *bpb);
 
 FatType fat_type(FatBpb *bpb);
 char *fat_type_str(FatType v);
+
+//void fat_init(FatFS *fs, DriveAccessFuncs *funcs, void *arg);

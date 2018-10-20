@@ -1,6 +1,9 @@
 OBJS = \
 			 fat.o\
 			 mbr.o\
+			 disk.o\
+			 memdisk.o\
+			 part.o\
 			 main.o
 
 CFLAGS = -m64 -O0 -MD -Wall -Werror -g

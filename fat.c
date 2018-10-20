@@ -80,3 +80,20 @@ fat_type_str(FatType v)
         return "FAT32";
     }
 }
+
+/*
+typedef struct FatFS {
+    FatType type;
+    DiskOperations *ops;
+    void *arg;
+} FatFS;
+
+void
+fat_init(FatFS *fs, DiskOperations *ops, void *arg)
+{
+    fs->ops = ops;
+    fs->arg = arg;
+
+    FatBpb *bpb = ops->read()
+}
+*/

@@ -8,104 +8,46 @@
 
 #include "u.h"
 
+#include "disk.h"
+#include "part.h"
+#include "memdisk.h"
 #include "fat.h"
 #include "mbr.h"
-
-typedef u64 Lba;
-typedef u64 LbaSize;
-
-typedef struct Drive Drive;
-u8 *drive_read(Drive *d, Lba lba, LbaSize count);
-
-typedef struct Partition {
-    Drive *drive;
-    Lba offset;
-    LbaSize nsects;
-} Partition;
-
-u8 *
-part_read(Partition *p, Lba lba, LbaSize count)
-{
-    return drive_read(p->drive, lba+p->offset, count);
-}
-
-typedef struct Drive {
-    u8 *bytes;
-    u16 sect_size;
-    LbaSize nsects;
-} Drive;
-
-u8 *
-drive_read(Drive *d, Lba lba, LbaSize count)
-{
-    if (lba + count > d->nsects) {
-        fprintf(stderr, "Can't read past end of drive (lba = %lu, count = %lu, but disk only has %lu sectors)\n", lba, count, d->nsects);
-        exit(1);
-    }
-    return d->bytes + lba*d->sect_size;
-}
-
-Mbr *
-drive_mbr(Drive *d)
-{
-    return (Mbr *)d->bytes;
-}
-
-int
-drive_part_count(Drive *d)
-{
-    return 4;
-}
-
-typedef struct Mbr Mbr;
-
-Partition
-drive_get_part(Drive *d, int partnum)
-{
-    Mbr *mbr = (Mbr *)d->bytes;
-    Partition p;
-
-    if (partnum >= MBR_PARTCOUNT) {
-        fprintf(stderr, "Can't read partition number %d, max partition is %d\n", partnum, drive_part_count(d));
-    }
-
-    MbrPartitionEntry *pe = &mbr->partition_table[partnum];
-
-    p.drive = d;
-    p.offset = mbr_pe_lba_start(pe);
-    p.nsects = mbr_pe_lba_size(pe);
-
-    return p;
-}
 
 char *cwd;
 
 void
-ls(char *cmd, Drive *d)
+ls(char *cmd, Partition *part)
 {
+    /*
+    FatFS fs;
+    fat_init(&fs, part);
+
+    FatDirEnt *dir = fat_root_dir(&fs)
+    */
     printf("ls\n");
 }
 
 void
-cat(char *cmd, Drive *d)
+cat(char *cmd, Partition *part)
 {
     printf("cat\n");
 }
 
 void
-cd(char *cmd, Drive *d)
+cd(char *cmd, Partition *part)
 {
     printf("cd\n");
 }
 
 void
-pwd(char *cmd, Drive *d)
+pwd(char *cmd, Partition *part)
 {
     printf("%s\n", cwd);
 }
 
 void
-help(char *cmd, Drive *d)
+help(char *cmd, Partition *part)
 {
     printf("Available commands:\n");
     printf("- ls\n");
@@ -141,11 +83,8 @@ shell(char *path)
         exit(1);
     }
 
-    Drive d = {
-        .bytes = p,
-        .sect_size = 512,
-        .nsects = st.st_size/512,
-    };
+    MemDisk md;
+    memdisk_init(&md, p, 512, st.st_size/512);
 
     cwd = "/";
 
@@ -169,7 +108,6 @@ shell(char *path)
             mbr_pe_lba_size(pe));
     }
 
-    Partition part = drive_get_part(&d, 0);
     FatVbr *vbr = (FatVbr *)part_read(&part, 0, 1);
     printf("\nPartition 1: %s\n", fat_type_str(fat_type(&vbr->bpb)));
     */
@@ -177,6 +115,8 @@ shell(char *path)
     #define CMD_SIZE 1024
     char cmd[CMD_SIZE];
     char *s;
+
+    Partition part = memdisk_get_part(&md, 0);
 
     while (1) {
         printf("> ");
@@ -187,15 +127,15 @@ shell(char *path)
         }
 
         if (strncmp(cmd, "ls", strlen("ls")) == 0) {
-            ls(cmd, &d);
+            ls(cmd, &part);
         } else if (strncmp(cmd, "cat", strlen("cat")) == 0) {
-            cat(cmd, &d);
+            cat(cmd, &part);
         } else if (strncmp(cmd, "cd", strlen("cd")) == 0) {
-            cd(cmd, &d);
+            cd(cmd, &part);
         } else if (strncmp(cmd, "pwd", strlen("pwd")) == 0) {
-            pwd(cmd, &d);
+            pwd(cmd, &part);
         } else if (strncmp(cmd, "help", strlen("help")) == 0) {
-            help(cmd, &d);
+            help(cmd, &part);
         } else if (strncmp(cmd, "exit", strlen("exit")) == 0) {
             break;
         } else {
