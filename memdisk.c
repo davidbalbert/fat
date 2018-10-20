@@ -5,7 +5,6 @@
 
 #include "disk.h"
 #include "memdisk.h"
-#include "mbr.h"
 
 u8 *
 memdisk_read(Disk *d, Lba lba, LbaCount count)
@@ -23,26 +22,6 @@ memdisk_read(Disk *d, Lba lba, LbaCount count)
 DiskOperations memdisk_ops = {
     .read = memdisk_read,
 };
-
-// returns a struct, not a pointer. Currently doing all allocation on the stack.
-// Bad idea, right?
-Partition
-memdisk_get_part(MemDisk *md, int partnum)
-{
-    Partition part;
-
-    Mbr *mbr = (Mbr *)md->bytes;
-
-    if (partnum >= MBR_PARTCOUNT) {
-        // todo error handling
-        fprintf(stderr, "Can't read partition number %d, highest partition is %d\n", partnum, MBR_PARTCOUNT-1);
-        exit(1);
-    }
-
-    MbrPartitionEntry *pe = &mbr->partition_table[partnum];
-
-    return *part_init(&part, (Disk *)md, mbr_pe_lba_start(pe), mbr_pe_lba_size(pe));
-}
 
 MemDisk *
 memdisk_init(MemDisk *md, u8 *bytes, u16 sect_size, LbaCount nsects)

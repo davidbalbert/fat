@@ -23,3 +23,4 @@ typedef struct Partition {
 } Partition;
 
 Partition *part_init(Partition *part, Disk *owner, Lba offset, LbaCount nsects);
+Partition disk_get_part(Disk *d, int partnum);

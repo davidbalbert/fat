@@ -115,7 +115,7 @@ shell(char *path)
     char cmd[CMD_SIZE];
     char *s;
 
-    Partition part = memdisk_get_part(&md, 0);
+    Partition part = disk_get_part((Disk *)&md, 0);
 
     while (1) {
         printf("> ");
