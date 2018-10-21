@@ -6,7 +6,7 @@
 #include "disk.h"
 #include "memdisk.h"
 
-u8 *
+void *
 memdisk_read(Disk *d, Lba lba, LbaCount count)
 {
     MemDisk *md = (MemDisk *)d;

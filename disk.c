@@ -14,7 +14,7 @@ disk_init(Disk *d, DiskOperations *ops)
     return d;
 }
 
-u8 *
+void *
 disk_read(Disk *d, Lba lba, LbaCount count)
 {
     return d->ops->read(d, lba, count);
@@ -41,7 +41,7 @@ disk_get_part(Disk *d, int partnum)
     return *part_init(&part, d, mbr_pe_lba_start(pe), mbr_pe_lba_size(pe));
 }
 
-u8 *
+void *
 part_read(Disk *self, Lba lba, LbaCount count)
 {
     Partition *part = (Partition *)self;

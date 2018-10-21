@@ -16,15 +16,52 @@
 char *cwd;
 
 void
+print_fat_fname(FatDirEnt *ent)
+{
+    int i;
+
+    for (i = 0; i < 8; i++) {
+        if (i == 0 && ent->fname[i] == 0x05) {
+            putc(0xE5, stdout);
+        } else if (ent->fname[i] == 0x20) {
+            break;
+        } else {
+            putc(ent->fname[i], stdout);
+        }
+    }
+
+    if (ent->ext[0] != 0x20) {
+        putc('.', stdout);
+    }
+
+    for (i = 0; i < 3; i++) {
+        if (ent->ext[i] == 0x20) {
+            break;
+        }
+
+        putc(ent->ext[i], stdout);
+    }
+}
+
+void
 ls(char *cmd, Partition *part)
 {
-    /*
     FatFS fs;
-    fat_init(&fs, part);
+    FatDirEnt *ent;
+    fat_init(&fs, (Disk *)part);
 
-    FatDirEnt *dir = fat_root_dir(&fs)
-    */
-    printf("ls\n");
+    for (ent = fat_root_dir(&fs); ent->fname[0] != 0; ent++) {
+        if (ent->fname[0] == 0xE5) {
+            continue;
+        }
+
+        if (ent->attr == FAT_ATTR_LONG_NAME) {
+            continue;
+        }
+
+        print_fat_fname(ent);
+        printf("\n");
+    }
 }
 
 void

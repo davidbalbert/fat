@@ -1,5 +1,6 @@
 #include "u.h"
 
+#include "disk.h"
 #include "fat.h"
 #include "x86.h"
 
@@ -39,14 +40,26 @@ fat_sects_per_cluster(FatBpb *bpb)
     return bpb->sects_per_cluster;
 }
 
+u8
+fat_nfats(FatBpb *bpb)
+{
+    return bpb->nfats;
+}
+
+u32
+fat_nroot_sects(FatBpb *bpb)
+{
+    u16 bps = fat_bytes_per_sect(bpb);
+    return ((fat_nroot_entries(bpb)*32) + (bps - 1)) / bps;
+}
+
 u32
 fat_nclusters(FatBpb *bpb)
 {
     u32 nsects = fat_nsects(bpb);
     u32 fatsz = fat_fatsz(bpb);
 
-    u16 bps = fat_bytes_per_sect(bpb);
-    u32 nroot_sects = ((fat_nroot_entries(bpb)*32) + (bps - 1)) / bps;
+    u32 nroot_sects = fat_nroot_sects(bpb);
     u32 nreserved = fat_nreserved_sects(bpb);
 
     u32 ndata_sects = nsects - (nreserved + bpb->nfats*fatsz + nroot_sects);
@@ -81,19 +94,31 @@ fat_type_str(FatType v)
     }
 }
 
-/*
-typedef struct FatFS {
-    FatType type;
-    DiskOperations *ops;
-    void *arg;
-} FatFS;
-
-void
-fat_init(FatFS *fs, DiskOperations *ops, void *arg)
+FatFS *
+fat_init(FatFS *fs, Disk *d)
 {
-    fs->ops = ops;
-    fs->arg = arg;
+    fs->disk = d;
 
-    FatBpb *bpb = ops->read()
+    FatBpb *bpb = disk_read(d, 0, 1);
+    fs->type = fat_type(bpb);
+
+    return fs;
 }
-*/
+
+FatBpb *
+fat_get_bpb(FatFS *fs)
+{
+    FatVbr *vbr = disk_read(fs->disk, 0, 1);
+    return &vbr->bpb;
+}
+
+FatDirEnt *
+fat_root_dir(FatFS *fs)
+{
+    FatBpb *bpb = fat_get_bpb(fs);
+
+    Lba first_root_sect = fat_nreserved_sects(bpb) + fat_nfats(bpb)*fat_fatsz(bpb);
+    LbaCount nroot_sects = fat_nroot_sects(bpb);
+
+    return disk_read(fs->disk, first_root_sect, nroot_sects);
+}

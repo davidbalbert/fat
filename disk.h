@@ -7,12 +7,12 @@ typedef struct Disk {
 } Disk;
 
 typedef struct DiskOperations {
-    u8 *(*read)(Disk *self, Lba lba, LbaCount count);
+    void *(*read)(Disk *self, Lba lba, LbaCount count);
 } DiskOperations;
 
 
 Disk *disk_init(Disk *d, DiskOperations *ops);
-u8 *disk_read(Disk *d, Lba lba, LbaCount count);
+void *disk_read(Disk *d, Lba lba, LbaCount count);
 
 
 typedef struct Partition {

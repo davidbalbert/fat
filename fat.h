@@ -37,8 +37,8 @@ typedef struct __attribute__((packed)) FatVbr {
 } FatVbr;
 
 typedef struct __attribute__((packed)) FatDirEnt {
-    char fname[8];
-    char ext[3];
+    uchar fname[8];
+    uchar ext[3];
     u8   attr;
     u8   reserved;
     u8   ctime_tenths; // 0-199.
@@ -52,6 +52,14 @@ typedef struct __attribute__((packed)) FatDirEnt {
     u32  filesz;
 } FatDirEnt;
 
+#define FAT_ATTR_READ_ONLY 0x01
+#define FAT_ATTR_HIDDEN 0x02
+#define FAT_ATTR_SYSTEM 0x04
+#define FAT_ATTR_VOLUME_ID 0x08
+#define FAT_ATTR_DIRECTORY 0x10
+#define FAT_ATTR_ARCHIVE 0x20
+#define FAT_ATTR_LONG_NAME (FAT_ATTR_READ_ONLY | FAT_ATTR_HIDDEN | FAT_ATTR_SYSTEM | FAT_ATTR_VOLUME_ID)
+
 u32 fat_nsects(FatBpb *bpb);
 u32 fat_fatsz(FatBpb *bpb);
 u16 fat_bytes_per_sect(FatBpb *bpb);
@@ -63,4 +71,11 @@ u32 fat_nclusters(FatBpb *bpb);
 FatType fat_type(FatBpb *bpb);
 char *fat_type_str(FatType v);
 
-//void fat_init(FatFS *fs, DriveAccessFuncs *funcs, void *arg);
+
+typedef struct FatFS {
+    FatType type;
+    Disk *disk;
+} FatFS;
+
+FatFS *fat_init(FatFS *fs, Disk *disk);
+FatDirEnt *fat_root_dir(FatFS *fs);
