@@ -28,7 +28,7 @@ ls(char *cmd, Partition *part)
             continue;
         }
 
-        if (ent->attr == FAT_ATTR_LONG_NAME) {
+        if (fat_dirent_is_long_name(ent)) {
             continue;
         }
 

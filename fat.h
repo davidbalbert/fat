@@ -70,6 +70,7 @@ typedef struct __attribute__((packed)) FatLongDirEnt {
 #define FAT_ATTR_DIRECTORY 0x10
 #define FAT_ATTR_ARCHIVE 0x20
 #define FAT_ATTR_LONG_NAME (FAT_ATTR_READ_ONLY | FAT_ATTR_HIDDEN | FAT_ATTR_SYSTEM | FAT_ATTR_VOLUME_ID)
+#define FAT_ATTR_LONG_NAME_MASK (FAT_ATTR_READ_ONLY | FAT_ATTR_HIDDEN | FAT_ATTR_SYSTEM | FAT_ATTR_VOLUME_ID | FAT_ATTR_DIRECTORY | FAT_ATTR_ARCHIVE)
 
 #define FAT_LAST_LONG_ENTRY 0x40
 
@@ -95,4 +96,5 @@ typedef struct FatFS {
 FatFS *fat_init(FatFS *fs, Disk *disk);
 FatDirEnt *fat_root_dir(FatFS *fs);
 
+int fat_dirent_is_long_name(FatDirEnt *ent);
 char *fat_dirent_read_name(FatDirEnt *ent, char *buf);

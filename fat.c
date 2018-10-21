@@ -113,7 +113,7 @@ fat_get_bpb(FatFS *fs)
 }
 
 static char *
-fat_dirent_read_shortname(FatDirEnt *ent, char *buf)
+fat_dirent_read_short_name(FatDirEnt *ent, char *buf)
 {
     int i;
     char *p = buf;
@@ -150,7 +150,7 @@ fat_dirent_read_shortname(FatDirEnt *ent, char *buf)
 }
 
 static char *
-fat_dirent_read_longname(FatLongDirEnt *lent, char *buf)
+fat_dirent_read_long_name(FatLongDirEnt *lent, char *buf)
 {
     *buf = '\0';
     return buf;
@@ -160,11 +160,17 @@ fat_dirent_read_longname(FatLongDirEnt *lent, char *buf)
 char *
 fat_dirent_read_name(FatDirEnt *ent, char *buf)
 {
-    if (ent->attr == FAT_ATTR_LONG_NAME) {
-        return fat_dirent_read_longname((FatLongDirEnt *)ent, buf);
+    if (fat_dirent_is_long_name(ent)) {
+        return fat_dirent_read_long_name((FatLongDirEnt *)ent, buf);
     } else {
-        return fat_dirent_read_shortname(ent, buf);
+        return fat_dirent_read_short_name(ent, buf);
     }
+}
+
+int
+fat_dirent_is_long_name(FatDirEnt *ent)
+{
+    return (ent->attr & FAT_ATTR_LONG_NAME_MASK) == FAT_ATTR_LONG_NAME;
 }
 
 FatDirEnt *
