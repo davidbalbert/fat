@@ -1,3 +1,6 @@
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "u.h"
 
 #include "disk.h"
@@ -113,10 +116,12 @@ fat_get_bpb(FatFS *fs)
 }
 
 static char *
-fat_dirent_read_short_name(FatDirEnt *ent, char *buf)
+fat_dirent_read_short_name(FatDirEnt *ent, char *buf, FatDirEnt **short_ent)
 {
     int i;
     char *p = buf;
+
+    *short_ent = ent;
 
     for (i = 0; i < 8; i++) {
         if (i == 0 && ent->fname[i] == 0x05) {
@@ -149,21 +154,115 @@ fat_dirent_read_short_name(FatDirEnt *ent, char *buf)
     return buf;
 }
 
-static char *
-fat_dirent_read_long_name(FatLongDirEnt *lent, char *buf)
+char *
+read_longent_codepoints(char *p, u16 *codepoints)
 {
-    *buf = '\0';
+    return (void *)0;
+}
+
+// TODO: actually handle characters beyond ASCII
+static char *
+fat_dirent_read_long_name(FatLongDirEnt *lent, char *buf, FatDirEnt **short_ent)
+{
+    int i, j;
+    u16 codepoint;
+    char *p = buf;
+
+    if (!(lent->order & FAT_LAST_LONG_ENTRY)) {
+        printf("fat_dirent_read_long_name: lent isn't the last entry\n");
+        exit(1);
+    }
+
+    int nlents = lent->order & ~FAT_LAST_LONG_ENTRY;
+
+    lent += nlents-1;
+    *short_ent += nlents;
+
+    printf("-> nlents %d\n", nlents);
+
+    for (i = 0; i < nlents; i++) {
+        printf("lent %d\n", i);
+        printf("-> codepoints1: ");
+        for (j = 0; j < 5; j++) {
+            codepoint = le2cpu16(lent->name1[j]);
+            printf("%x ", codepoint);
+
+            if (codepoint == 0) {
+                *p = '\0';
+                break;
+            }
+
+            *p = codepoint & 0xFF;
+            p++;
+        }
+
+        printf("\n");
+
+        if (*p == '\0') {
+            printf("-> break1\n");
+            break;
+        }
+
+        printf("-> codepoints2: ");
+        for (j = 0; j < 6; j++) {
+            codepoint = le2cpu16(lent->name2[j]);
+            printf("%x ", codepoint);
+
+            if (codepoint == 0) {
+                *p = '\0';
+                break;
+            }
+
+            *p = codepoint & 0xFF;
+            p++;
+        }
+        printf("\n");
+
+        if (*p == '\0') {
+            printf("-> break2\n");
+            break;
+        }
+
+        printf("-> codepoints3: ");
+        for (j = 0; j < 2; j++) {
+            codepoint = le2cpu16(lent->name3[j]);
+            printf("%x ", codepoint);
+
+            if (codepoint == 0) {
+                *p = '\0';
+                break;
+            }
+
+            *p = codepoint & 0xFF;
+            p++;
+        }
+
+        printf("\n");
+        if (*p == '\0') {
+            printf("-> break3\n");
+            break;
+        }
+
+        lent--;
+    }
+
+    // handle the case where the filename ends
+    // exactly at the end of the lent.
+    if (*p != '\0') {
+        *p = '\0';
+    }
+
     return buf;
 }
 
 // buf must be FAT_NAME_BUF_SIZE;
 char *
-fat_dirent_read_name(FatDirEnt *ent, char *buf)
+fat_dirent_read_name(FatDirEnt *ent, char *buf, FatDirEnt **short_ent)
 {
     if (fat_dirent_is_long_name(ent)) {
-        return fat_dirent_read_long_name((FatLongDirEnt *)ent, buf);
+        return fat_dirent_read_long_name((FatLongDirEnt *)ent, buf, short_ent);
     } else {
-        return fat_dirent_read_short_name(ent, buf);
+        return fat_dirent_read_short_name(ent, buf, short_ent);
     }
 }
 

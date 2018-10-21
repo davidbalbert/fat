@@ -54,13 +54,13 @@ typedef struct __attribute__((packed)) FatDirEnt {
 
 typedef struct __attribute__((packed)) FatLongDirEnt {
     u8 order;
-    char name1[10];
+    u16 name1[5]; // UCS-2 little endian
     u8 attr;
     u8 type; // should be 0
     u8 checksum;
-    char name2[12];
+    u16 name2[6]; // UCS-2 little endian
     u16 first_cluster_lo; // must be zero. meaningless.
-    char name3[4];
+    u16 name3[2]; // UCS-2 little endian
 } FatLongDirEnt;
 
 #define FAT_ATTR_READ_ONLY 0x01
@@ -97,4 +97,4 @@ FatFS *fat_init(FatFS *fs, Disk *disk);
 FatDirEnt *fat_root_dir(FatFS *fs);
 
 int fat_dirent_is_long_name(FatDirEnt *ent);
-char *fat_dirent_read_name(FatDirEnt *ent, char *buf);
+char *fat_dirent_read_name(FatDirEnt *ent, char *buf, FatDirEnt **short_ent);

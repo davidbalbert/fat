@@ -28,11 +28,9 @@ ls(char *cmd, Partition *part)
             continue;
         }
 
-        if (fat_dirent_is_long_name(ent)) {
-            continue;
-        }
+        fat_dirent_read_name(ent, name, &ent);
 
-        printf("%s\n", fat_dirent_read_name(ent, name));
+        printf("%s\n", name);
     }
 }
 
