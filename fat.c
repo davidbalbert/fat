@@ -186,9 +186,12 @@ fat_dirent_read_long_name(FatLongDirEnt *lent, char *buf, FatDirEnt **short_ent)
                 *p = '\0';
                 p++;
                 break;
+            } else if (codepoint > 0xFF) {
+                *p = '?';
+            } else {
+                *p = codepoint & 0xFF;
             }
 
-            *p = codepoint & 0xFF;
             p++;
         }
 
@@ -203,9 +206,12 @@ fat_dirent_read_long_name(FatLongDirEnt *lent, char *buf, FatDirEnt **short_ent)
                 *p = '\0';
                 p++;
                 break;
+            } else if (codepoint > 0xFF) {
+                *p = '?';
+            } else {
+                *p = codepoint & 0xFF;
             }
 
-            *p = codepoint & 0xFF;
             p++;
         }
 
@@ -220,9 +226,12 @@ fat_dirent_read_long_name(FatLongDirEnt *lent, char *buf, FatDirEnt **short_ent)
                 *p = '\0';
                 p++;
                 break;
+            } else if (codepoint > 0xFF) {
+                *p = '?';
+            } else {
+                *p = codepoint & 0xFF;
             }
 
-            *p = codepoint & 0xFF;
             p++;
         }
 
