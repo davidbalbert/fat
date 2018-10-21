@@ -154,8 +154,9 @@ fat_dirent_read_short_name(FatDirEnt *ent, char *buf, FatDirEnt **short_ent)
     return buf;
 }
 
-char *
-read_longent_codepoints(char *p, u16 *codepoints, int count)
+// returns 1 if the string is finished, returns 0 otherwise.
+int
+read_longent_codepoints(char **p, u16 *codepoints, int count)
 {
     int i;
     u16 codepoint;
@@ -164,26 +165,26 @@ read_longent_codepoints(char *p, u16 *codepoints, int count)
         codepoint = le2cpu16(codepoints[i]);
 
         if (codepoint == 0) {
-            *p = '\0';
-            p++;
-            break;
+            **p = '\0';
+            *p += 1;
+            return 1;
         } else if (codepoint > 0xFF) {
-            *p = '?';
+            **p = '?';
         } else {
-            *p = codepoint & 0xFF;
+            **p = codepoint & 0xFF;
         }
 
-        p++;
+        *p += 1;
     }
 
-    return p;
+    return 0;
 }
 
 // TODO: actually handle characters beyond ASCII
 static char *
 fat_dirent_read_long_name(FatLongDirEnt *lent, char *buf, FatDirEnt **short_ent)
 {
-    int i;
+    int i, done;
     char *p = buf;
 
     if (!(lent->order & FAT_LAST_LONG_ENTRY)) {
@@ -197,14 +198,14 @@ fat_dirent_read_long_name(FatLongDirEnt *lent, char *buf, FatDirEnt **short_ent)
     *short_ent += nlents;
 
     for (i = 0; i < nlents; i++) {
-        p = read_longent_codepoints(p, lent->name1, 5);
-        if (*(p-1) == '\0') { break; }
+        done = read_longent_codepoints(&p, lent->name1, 5);
+        if (done) { break; }
 
-        p = read_longent_codepoints(p, lent->name2, 6);
-        if (*(p-1) == '\0') { break; }
+        done = read_longent_codepoints(&p, lent->name2, 6);
+        if (done) { break; }
 
-        p = read_longent_codepoints(p, lent->name3, 2);
-        if (*(p-1) == '\0') { break; }
+        done = read_longent_codepoints(&p, lent->name3, 2);
+        if (done) { break; }
 
         lent--;
     }
