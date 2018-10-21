@@ -155,17 +155,35 @@ fat_dirent_read_short_name(FatDirEnt *ent, char *buf, FatDirEnt **short_ent)
 }
 
 char *
-read_longent_codepoints(char *p, u16 *codepoints)
+read_longent_codepoints(char *p, u16 *codepoints, int count)
 {
-    return (void *)0;
+    int i;
+    u16 codepoint;
+
+    for (i = 0; i < count; i++) {
+        codepoint = le2cpu16(codepoints[i]);
+
+        if (codepoint == 0) {
+            *p = '\0';
+            p++;
+            break;
+        } else if (codepoint > 0xFF) {
+            *p = '?';
+        } else {
+            *p = codepoint & 0xFF;
+        }
+
+        p++;
+    }
+
+    return p;
 }
 
 // TODO: actually handle characters beyond ASCII
 static char *
 fat_dirent_read_long_name(FatLongDirEnt *lent, char *buf, FatDirEnt **short_ent)
 {
-    int i, j;
-    u16 codepoint;
+    int i;
     char *p = buf;
 
     if (!(lent->order & FAT_LAST_LONG_ENTRY)) {
@@ -179,65 +197,14 @@ fat_dirent_read_long_name(FatLongDirEnt *lent, char *buf, FatDirEnt **short_ent)
     *short_ent += nlents;
 
     for (i = 0; i < nlents; i++) {
-        for (j = 0; j < 5; j++) {
-            codepoint = le2cpu16(lent->name1[j]);
+        p = read_longent_codepoints(p, lent->name1, 5);
+        if (*(p-1) == '\0') { break; }
 
-            if (codepoint == 0) {
-                *p = '\0';
-                p++;
-                break;
-            } else if (codepoint > 0xFF) {
-                *p = '?';
-            } else {
-                *p = codepoint & 0xFF;
-            }
+        p = read_longent_codepoints(p, lent->name2, 6);
+        if (*(p-1) == '\0') { break; }
 
-            p++;
-        }
-
-        if (*(p-1) == '\0') {
-            break;
-        }
-
-        for (j = 0; j < 6; j++) {
-            codepoint = le2cpu16(lent->name2[j]);
-
-            if (codepoint == 0) {
-                *p = '\0';
-                p++;
-                break;
-            } else if (codepoint > 0xFF) {
-                *p = '?';
-            } else {
-                *p = codepoint & 0xFF;
-            }
-
-            p++;
-        }
-
-        if (*(p-1) == '\0') {
-            break;
-        }
-
-        for (j = 0; j < 2; j++) {
-            codepoint = le2cpu16(lent->name3[j]);
-
-            if (codepoint == 0) {
-                *p = '\0';
-                p++;
-                break;
-            } else if (codepoint > 0xFF) {
-                *p = '?';
-            } else {
-                *p = codepoint & 0xFF;
-            }
-
-            p++;
-        }
-
-        if (*(p-1) == '\0') {
-            break;
-        }
+        p = read_longent_codepoints(p, lent->name3, 2);
+        if (*(p-1) == '\0') { break; }
 
         lent--;
     }
