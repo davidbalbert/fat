@@ -112,6 +112,61 @@ fat_get_bpb(FatFS *fs)
     return &vbr->bpb;
 }
 
+static char *
+fat_dirent_read_shortname(FatDirEnt *ent, char *buf)
+{
+    int i;
+    char *p = buf;
+
+    for (i = 0; i < 8; i++) {
+        if (i == 0 && ent->fname[i] == 0x05) {
+            *p = 0xE5;
+        } else if (ent->fname[i] == 0x20) {
+            break;
+        } else {
+            *p = ent->fname[i];
+        }
+
+        p++;
+    }
+
+    if (ent->ext[0] != 0x20) {
+        *p = '.';
+        p++;
+    }
+
+    for (i = 0; i < 3; i++) {
+        if (ent->ext[i] == 0x20) {
+            break;
+        }
+
+        *p = ent->ext[i];
+        p++;
+    }
+
+    *p = '\0';
+
+    return buf;
+}
+
+static char *
+fat_dirent_read_longname(FatLongDirEnt *lent, char *buf)
+{
+    *buf = '\0';
+    return buf;
+}
+
+// buf must be FAT_NAME_BUF_SIZE;
+char *
+fat_dirent_read_name(FatDirEnt *ent, char *buf)
+{
+    if (ent->attr == FAT_ATTR_LONG_NAME) {
+        return fat_dirent_read_longname((FatLongDirEnt *)ent, buf);
+    } else {
+        return fat_dirent_read_shortname(ent, buf);
+    }
+}
+
 FatDirEnt *
 fat_root_dir(FatFS *fs)
 {

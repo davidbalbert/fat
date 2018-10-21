@@ -52,6 +52,17 @@ typedef struct __attribute__((packed)) FatDirEnt {
     u32  filesz;
 } FatDirEnt;
 
+typedef struct __attribute__((packed)) FatLongDirEnt {
+    u8 order;
+    char name1[10];
+    u8 attr;
+    u8 type; // should be 0
+    u8 checksum;
+    char name2[12];
+    u16 first_cluster_lo; // must be zero. meaningless.
+    char name3[4];
+} FatLongDirEnt;
+
 #define FAT_ATTR_READ_ONLY 0x01
 #define FAT_ATTR_HIDDEN 0x02
 #define FAT_ATTR_SYSTEM 0x04
@@ -59,6 +70,10 @@ typedef struct __attribute__((packed)) FatDirEnt {
 #define FAT_ATTR_DIRECTORY 0x10
 #define FAT_ATTR_ARCHIVE 0x20
 #define FAT_ATTR_LONG_NAME (FAT_ATTR_READ_ONLY | FAT_ATTR_HIDDEN | FAT_ATTR_SYSTEM | FAT_ATTR_VOLUME_ID)
+
+#define FAT_LAST_LONG_ENTRY 0x40
+
+#define FAT_NAME_BUF_SIZE 256
 
 u32 fat_nsects(FatBpb *bpb);
 u32 fat_fatsz(FatBpb *bpb);
@@ -79,3 +94,5 @@ typedef struct FatFS {
 
 FatFS *fat_init(FatFS *fs, Disk *disk);
 FatDirEnt *fat_root_dir(FatFS *fs);
+
+char *fat_dirent_read_name(FatDirEnt *ent, char *buf);
