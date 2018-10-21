@@ -178,14 +178,9 @@ fat_dirent_read_long_name(FatLongDirEnt *lent, char *buf, FatDirEnt **short_ent)
     lent += nlents-1;
     *short_ent += nlents;
 
-    printf("-> nlents %d\n", nlents);
-
     for (i = 0; i < nlents; i++) {
-        printf("lent %d\n", i+1);
-        printf("-> codepoints1: ");
         for (j = 0; j < 5; j++) {
             codepoint = le2cpu16(lent->name1[j]);
-            printf("%x ", codepoint);
 
             if (codepoint == 0) {
                 *p = '\0';
@@ -197,17 +192,12 @@ fat_dirent_read_long_name(FatLongDirEnt *lent, char *buf, FatDirEnt **short_ent)
             p++;
         }
 
-        printf("\n");
-
         if (*(p-1) == '\0') {
-            printf("-> break1\n");
             break;
         }
 
-        printf("-> codepoints2: ");
         for (j = 0; j < 6; j++) {
             codepoint = le2cpu16(lent->name2[j]);
-            printf("%x ", codepoint);
 
             if (codepoint == 0) {
                 *p = '\0';
@@ -218,17 +208,13 @@ fat_dirent_read_long_name(FatLongDirEnt *lent, char *buf, FatDirEnt **short_ent)
             *p = codepoint & 0xFF;
             p++;
         }
-        printf("\n");
 
         if (*(p-1) == '\0') {
-            printf("-> break2\n");
             break;
         }
 
-        printf("-> codepoints3: ");
         for (j = 0; j < 2; j++) {
             codepoint = le2cpu16(lent->name3[j]);
-            printf("%x ", codepoint);
 
             if (codepoint == 0) {
                 *p = '\0';
@@ -240,9 +226,7 @@ fat_dirent_read_long_name(FatLongDirEnt *lent, char *buf, FatDirEnt **short_ent)
             p++;
         }
 
-        printf("\n");
         if (*(p-1) == '\0') {
-            printf("-> break3\n");
             break;
         }
 
