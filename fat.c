@@ -240,10 +240,31 @@ fat_dirent_next(FatDirEnt *ent)
     return ent + nlents + 1; // + 1 to skip our short entry as well
 }
 
+FatDirEnt *
+fat_get_short_ent(FatDirEnt *ent)
+{
+    if (!fat_dirent_is_long(ent)) {
+        return ent;
+    }
+
+    FatLongDirEnt *lent = (FatLongDirEnt *)ent;
+    int nlents = lent->order & ~FAT_LAST_LONG_ENTRY;
+
+    return ent + nlents;
+}
+
 int
 fat_dirent_is_long(FatDirEnt *ent)
 {
     return (ent->attr & FAT_ATTR_LONG_NAME_MASK) == FAT_ATTR_LONG_NAME;
+}
+
+int
+fat_dirent_is_dir(FatDirEnt *ent)
+{
+    ent = fat_get_short_ent(ent);
+
+    return ent->attr & FAT_ATTR_DIRECTORY;
 }
 
 FatDirEnt *

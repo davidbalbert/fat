@@ -31,8 +31,13 @@ ls(char *cmd, Partition *part)
         }
 
         fat_dirent_read_name(ent, name);
+        printf("%s", name);
 
-        printf("%s\n", name);
+        if (fat_dirent_is_dir(ent)) {
+            printf("/\n");
+        } else {
+            printf("\n");
+        }
     }
 }
 
