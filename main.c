@@ -15,6 +15,25 @@
 
 char *cwd;
 
+char *
+month2str(u8 month) {
+    switch (month) {
+    case 1: return "Jan";
+    case 2: return "Feb";
+    case 3: return "Mar";
+    case 4: return "Apr";
+    case 5: return "May";
+    case 6: return "Jun";
+    case 7: return "Jul";
+    case 8: return "Aug";
+    case 9: return "Sep";
+    case 10: return "Oct";
+    case 11: return "Nov";
+    case 12: return "Dec";
+    default: return "ERR";
+    }
+}
+
 void
 ls(char *cmd, Partition *part)
 {
@@ -36,9 +55,24 @@ ls(char *cmd, Partition *part)
             printf("-");
         }
 
-        printf("rwxrwxrwx\t");
+        if (fat_dirent_readonly(ent)) {
+            printf("r-xr-xr-x\t");
+        } else {
+            printf("rwxrwxrwx\t");
+        }
 
-        printf("%u\t", fat_dirent_filesz(ent));
+        printf("%uB\t", fat_dirent_filesz(ent));
+
+        u16 mdate = fat_dirent_mdate(ent);
+        u16 mtime = fat_dirent_mtime(ent);
+
+        printf("%s %02d %04d %02d:%02d\t",
+            month2str(fat_month(mdate)),
+            fat_day(mdate),
+            fat_year(mdate),
+            fat_hours(mtime),
+            fat_minutes(mtime));
+
         printf("%s", fat_dirent_read_name(ent, name));
 
         if (fat_dirent_is_dir(ent)) {

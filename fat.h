@@ -44,7 +44,7 @@ typedef struct __attribute__((packed)) FatDirEnt {
     u8   ctime_tenths; // 0-199.
     u16  ctime;
     u16  cdate;
-    u16  adate; // last accessed (read or write
+    u16  adate; // last accessed (read or write)
     u16  first_cluster_hi;
     u16  mtime;
     u16  mdate;
@@ -98,6 +98,18 @@ FatDirEnt *fat_root_dir(FatFS *fs);
 
 int fat_dirent_is_long(FatDirEnt *ent);
 int fat_dirent_is_dir(FatDirEnt *ent);
+int fat_dirent_readonly(FatDirEnt *ent);
 char *fat_dirent_read_name(FatDirEnt *ent, char *buf);
 u32 fat_dirent_filesz(FatDirEnt *ent);
 FatDirEnt *fat_dirent_next(FatDirEnt *ent);
+u16 fat_dirent_mtime(FatDirEnt *ent);
+u16 fat_dirent_mdate(FatDirEnt *ent);
+
+// dates and times
+u32 fat_year(u16 date);
+u8  fat_month(u16 date);
+u8  fat_day(u16 date);
+
+u8 fat_hours(u16 time);
+u8 fat_minutes(u16 time);
+u8 fat_seconds(u16 time);

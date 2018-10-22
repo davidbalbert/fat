@@ -262,6 +262,14 @@ fat_dirent_filesz(FatDirEnt *ent)
 }
 
 int
+fat_dirent_readonly(FatDirEnt *ent)
+{
+    ent = fat_get_short_ent(ent);
+
+    return ent->attr & FAT_ATTR_READ_ONLY;
+}
+
+int
 fat_dirent_is_long(FatDirEnt *ent)
 {
     return (ent->attr & FAT_ATTR_LONG_NAME_MASK) == FAT_ATTR_LONG_NAME;
@@ -273,6 +281,58 @@ fat_dirent_is_dir(FatDirEnt *ent)
     ent = fat_get_short_ent(ent);
 
     return ent->attr & FAT_ATTR_DIRECTORY;
+}
+
+u16
+fat_dirent_mtime(FatDirEnt *ent)
+{
+    ent = fat_get_short_ent(ent);
+
+    return le2cpu16(ent->mtime);
+}
+
+u16
+fat_dirent_mdate(FatDirEnt *ent)
+{
+    ent = fat_get_short_ent(ent);
+
+    return le2cpu16(ent->mdate);
+}
+
+u32
+fat_year(u16 date)
+{
+    return ((date >> 9) & 0x7F) + 1980;
+}
+
+u8
+fat_month(u16 date)
+{
+    return (date >> 5) & 0xF;
+}
+
+u8
+fat_day(u16 date)
+{
+    return date & 0x1F;
+}
+
+u8
+fat_hours(u16 time)
+{
+    return (time >> 11) & 0x1F;
+}
+
+u8
+fat_minutes(u16 time)
+{
+    return (time >> 5) & 0x3F;
+}
+
+u8
+fat_seconds(u16 time)
+{
+    return (time & 0x1F) * 2;
 }
 
 FatDirEnt *
