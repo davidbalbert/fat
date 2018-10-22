@@ -174,7 +174,7 @@ shell(char *path)
     Partition part = disk_get_part((Disk *)&md, 0);
 
     while (1) {
-        printf("> ");
+        printf("%s > ", cwd);
         s = fgets(cmd, CMD_SIZE, stdin);
 
         if (s == NULL) {
