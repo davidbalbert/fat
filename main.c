@@ -144,30 +144,6 @@ shell(char *path)
 
     cwd = "/";
 
-    /*
-    printf("disk: %s\n", path);
-    printf("bootable: %s\n", mbr_bootable(drive_mbr(&d)) ? "yes" : "no");
-
-    for (int i = 0; i < MBR_PARTCOUNT; i++) {
-        MbrPartitionEntry *pe = &drive_mbr(&d)->partition_table[i];
-
-        printf("%s%d: (%d, %d, %d) - (%d, %d, %d), [lba: %d, %d]\n",
-            mbr_pe_active(pe) ? "*" : " ",
-            i + 1,
-            mbr_pe_c(pe->chs_start),
-            mbr_pe_h(pe->chs_start),
-            mbr_pe_s(pe->chs_start),
-            mbr_pe_c(pe->chs_end),
-            mbr_pe_h(pe->chs_end),
-            mbr_pe_s(pe->chs_end),
-            mbr_pe_lba_start(pe),
-            mbr_pe_lba_size(pe));
-    }
-
-    FatVbr *vbr = (FatVbr *)part_read(&part, 0, 1);
-    printf("\nPartition 1: %s\n", fat_type_str(fat_type(&vbr->bpb)));
-    */
-
     #define CMD_SIZE 1024
     char cmd[CMD_SIZE];
     char *s;
