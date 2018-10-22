@@ -116,12 +116,10 @@ fat_get_bpb(FatFS *fs)
 }
 
 static char *
-fat_dirent_read_short_name(FatDirEnt *ent, char *buf, FatDirEnt **short_ent)
+fat_dirent_read_short_name(FatDirEnt *ent, char *buf)
 {
     int i;
     char *p = buf;
-
-    *short_ent = ent;
 
     for (i = 0; i < 8; i++) {
         if (i == 0 && ent->fname[i] == 0x05) {
@@ -182,7 +180,7 @@ read_longent_codepoints(char **p, u16 *codepoints, int count)
 
 // TODO: actually handle characters beyond ASCII
 static char *
-fat_dirent_read_long_name(FatLongDirEnt *lent, char *buf, FatDirEnt **short_ent)
+fat_dirent_read_long_name(FatLongDirEnt *lent, char *buf)
 {
     int i, done;
     char *p = buf;
@@ -195,7 +193,6 @@ fat_dirent_read_long_name(FatLongDirEnt *lent, char *buf, FatDirEnt **short_ent)
     int nlents = lent->order & ~FAT_LAST_LONG_ENTRY;
 
     lent += nlents-1;
-    *short_ent += nlents;
 
     for (i = 0; i < nlents; i++) {
         done = read_longent_codepoints(&p, lent->name1, 5);
@@ -221,17 +218,30 @@ fat_dirent_read_long_name(FatLongDirEnt *lent, char *buf, FatDirEnt **short_ent)
 
 // buf must be FAT_NAME_BUF_SIZE;
 char *
-fat_dirent_read_name(FatDirEnt *ent, char *buf, FatDirEnt **short_ent)
+fat_dirent_read_name(FatDirEnt *ent, char *buf)
 {
-    if (fat_dirent_is_long_name(ent)) {
-        return fat_dirent_read_long_name((FatLongDirEnt *)ent, buf, short_ent);
+    if (fat_dirent_is_long(ent)) {
+        return fat_dirent_read_long_name((FatLongDirEnt *)ent, buf);
     } else {
-        return fat_dirent_read_short_name(ent, buf, short_ent);
+        return fat_dirent_read_short_name(ent, buf);
     }
 }
 
+FatDirEnt *
+fat_dirent_next(FatDirEnt *ent)
+{
+    if (!fat_dirent_is_long(ent)) {
+        return ent + 1;
+    }
+
+    FatLongDirEnt *lent = (FatLongDirEnt *)ent;
+    int nlents = lent->order & ~FAT_LAST_LONG_ENTRY;
+
+    return ent + nlents + 1; // + 1 to skip our short entry as well
+}
+
 int
-fat_dirent_is_long_name(FatDirEnt *ent)
+fat_dirent_is_long(FatDirEnt *ent)
 {
     return (ent->attr & FAT_ATTR_LONG_NAME_MASK) == FAT_ATTR_LONG_NAME;
 }

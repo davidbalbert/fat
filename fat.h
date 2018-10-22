@@ -96,5 +96,6 @@ typedef struct FatFS {
 FatFS *fat_init(FatFS *fs, Disk *disk);
 FatDirEnt *fat_root_dir(FatFS *fs);
 
-int fat_dirent_is_long_name(FatDirEnt *ent);
-char *fat_dirent_read_name(FatDirEnt *ent, char *buf, FatDirEnt **short_ent);
+int fat_dirent_is_long(FatDirEnt *ent);
+char *fat_dirent_read_name(FatDirEnt *ent, char *buf);
+FatDirEnt *fat_dirent_next(FatDirEnt *ent);

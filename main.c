@@ -23,12 +23,14 @@ ls(char *cmd, Partition *part)
     fat_init(&fs, (Disk *)part);
     char name[FAT_NAME_BUF_SIZE];
 
-    for (ent = fat_root_dir(&fs); ent->fname[0] != 0; ent++) {
+    ent = fat_root_dir(&fs);
+
+    for (ent = fat_root_dir(&fs); ent->fname[0] != 0; ent = fat_dirent_next(ent)) {
         if (ent->fname[0] == 0xE5) {
             continue;
         }
 
-        fat_dirent_read_name(ent, name, &ent);
+        fat_dirent_read_name(ent, name);
 
         printf("%s\n", name);
     }
