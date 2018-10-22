@@ -99,4 +99,5 @@ FatDirEnt *fat_root_dir(FatFS *fs);
 int fat_dirent_is_long(FatDirEnt *ent);
 int fat_dirent_is_dir(FatDirEnt *ent);
 char *fat_dirent_read_name(FatDirEnt *ent, char *buf);
+u32 fat_dirent_filesz(FatDirEnt *ent);
 FatDirEnt *fat_dirent_next(FatDirEnt *ent);

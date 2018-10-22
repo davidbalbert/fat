@@ -253,6 +253,14 @@ fat_get_short_ent(FatDirEnt *ent)
     return ent + nlents;
 }
 
+u32
+fat_dirent_filesz(FatDirEnt *ent)
+{
+    ent = fat_get_short_ent(ent);
+
+    return le2cpu32(ent->filesz);
+}
+
 int
 fat_dirent_is_long(FatDirEnt *ent)
 {
