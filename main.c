@@ -13,6 +13,7 @@
 #include "fat.h"
 #include "mbr.h"
 
+char *progname;
 char *cwd;
 
 char *
@@ -211,7 +212,6 @@ shell(char *path)
     }
 }
 
-char *progname;
 void usage(void);
 
 int
